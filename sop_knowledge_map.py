@@ -183,7 +183,7 @@ def docs_to_dict(dir_path):
     dict:A dict linking doc conditons and actions to the file paths
 
     """
-    files = [f for f in listdir(dir_path) if isfile(join(dir_path, f))]
+    files = [f for f in listdir(dir_path) if isfile(join(dir_path, f)) and '.docx' in f]
     dir_dict = {}
     doc_words = {}
 
