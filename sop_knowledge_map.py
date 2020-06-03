@@ -4,7 +4,28 @@ from pprint import pprint
 import pydot
 from os import listdir
 from os.path import isfile, join
-from deepmerge import always_merger
+
+# Source: https://stackoverflow.com/questions/20656135/python-deep-merge-dictionary-data
+def deep_merge_dicts(source, destination):
+    """
+    Deep merge dicts
+
+    >>> a = { 'first' : { 'all_rows' : { 'pass' : 'dog', 'number' : '1' } } }
+    >>> b = { 'first' : { 'all_rows' : { 'fail' : 'cat', 'number' : '5' } } }
+    >>> merge(b, a) == { 'first' : { 'all_rows' : { 'pass' : 'dog', 'fail' : 'cat', 'number' : '5' } } }
+    True
+    """
+    for key, value in source.items():
+        if isinstance(value, dict):
+            # get node or create one
+            node = destination.setdefault(key, {})
+            deep_merge_dicts(value, node)
+        elif isinstance(value, list) and key in destination.keys():
+            destination[key] = list(set(value + destination[key]))            
+        else:
+            destination[key] = value
+
+    return destination
 
 def nested_list_to_dict(ul, doc_words_setter):
     """Parse a list element from a SOP doc into a dict
@@ -168,8 +189,8 @@ def docs_to_dict(dir_path):
 
     for file_path in files:
         file_dict, file_doc_words = doc_to_dict(dir_path + '/' + file_path)
-        dir_dict = always_merger.merge(dir_dict, file_dict)
-        doc_words = always_merger.merge(doc_words, file_doc_words)
+        dir_dict = deep_merge_dicts(dir_dict, file_dict)
+        doc_words = deep_merge_dicts(doc_words, file_doc_words)
 
     return dir_dict, doc_words
 
